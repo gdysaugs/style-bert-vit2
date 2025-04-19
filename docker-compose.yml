@@ -1,0 +1,88 @@
+services:
+  frontend:
+    build:
+      context: ./frontend # Dockerfileがあるディレクトリ
+      dockerfile: Dockerfile
+    container_name: frontend_service # コンテナの名前（任意）
+    ports:
+      # "ホストOSのポート:コンテナ内のポート"
+      # .env の FRONTEND_HOST_PORT と Dockerfile の EXPOSE/CMD のポートに合わせる
+      - "${FRONTEND_HOST_PORT:-8080}:${FRONTEND_PORT:-5173}" # ホスト側ポートは環境変数で変更可能にする (デフォルト8080 -> Viteデフォルト5173)
+    volumes:
+      # 開発中はコードの変更を即時反映させるためにマウント
+      - ./frontend:/app # 追加
+      # node_modules はホストと共有しない (コンテナ固有のものを使う)
+      - /app/node_modules # 追加
+    networks:
+      - app_network # このサービスをネットワークに参加させる
+    environment:
+      # ホットリロードのために Chokidar がポーリングを使うようにする (WSL2 環境で推奨)
+      - CHOKIDAR_USEPOLLING=true # 追加
+    # Vite開発サーバーが停止しないようにする
+    stdin_open: true # 追加
+    tty: true # 追加
+    restart: unless-stopped # 追加
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend # Dockerfileがあるディレクトリ
+      dockerfile: Dockerfile
+    container_name: backend_service # コンテナの名前（任意）
+    env_file:
+      - .env # .envファイルを読み込んで環境変数として設定
+    ports:
+      # "ホストOSのポート:コンテナ内のポート"
+      # .env の BACKEND_PORT と Dockerfile の EXPOSE/CMD のポートに合わせる
+      - "${BACKEND_HOST_PORT:-8000}:${BACKEND_PORT:-8000}" # ホスト側ポートは環境変数で変更可能にする (デフォルト8000)
+    volumes:
+      # 開発中はコードの変更を即時反映させるためにマウントする（本番では削除推奨）
+      - ./backend/app:/app/app
+    networks:
+      - app_network # このサービスをネットワークに参加させる
+    restart: unless-stopped # コンテナが停止した場合、手動で停止しない限り再起動
+    depends_on:
+      - tts
+
+  tts:
+    build:
+      context: ./tts # Dockerfileがあるディレクトリ
+      dockerfile: Dockerfile
+    container_name: tts_service # コンテナの名前（任意）
+    # env_file:
+      # - .env # TTS固有の環境変数があれば読み込む (Dockerfile内でも設定可能)
+    ports:
+      # "ホストOSのポート:コンテナ内のポート"
+      # デバッグ用にホストからアクセスしたい場合に公開 (例: 5000:5000)
+      # 通常、backendからの通信のみなら公開不要
+      - "${TTS_HOST_PORT:-5000}:${TTS_PORT:-5000}" # ホスト側ポートは環境変数で変更可能にする (デフォルト5000)
+    volumes:
+      # ホストのコードをマウント (開発用)
+      - ./tts:/app
+      # BERTモデルは名前付きボリュームに保持し、ホストからの上書きを防ぐ
+      - tts_bert_data:/app/bert
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1 # 使うGPUの数 (all も可)
+              capabilities: [gpu]
+    networks:
+      - app_network # このサービスをネットワークに参加させる
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge # Dockerのデフォルトネットワークドライバ
+
+volumes:
+  tts_bert_data: # tts_serviceで使う名前付きボリュームを定義
+
+# volumes:
+  # 必要なら名前付きボリュームを定義
+
+# networks:
+  # app_network:
+    # driver: bridge # ネットワークドライバを指定 
