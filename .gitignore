@@ -1,23 +1,18 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
-.env
-*.env.*
+*.egg-info/
 env/
 venv/
 ENV/
 env.bak
 venv.bak
-*.egg-info/
-dist/
-build/
 .pytest_cache/
 .mypy_cache/
 .coverage
 
-# Node
+# Node / Frontend
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -25,61 +20,40 @@ yarn-error.log*
 .npm
 .yarn
 pnpm-lock.yaml
-
-# OS / Editor specific
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-.cursor/
-
-# Docker build artifacts (BERT model downloaded in Dockerfile)
-# tts/bert/
-
-# Log files
-*.log
-
-# Specific files/dirs from status output if needed
-test.wav
-ERROR # このファイルも無視リストに追加
-
-# Git LFS files (These will be pointers, not the actual large files)
-# *.safetensors
-
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Environment variables
-.env
-.env.*
-!.env.example
-
-# OS generated files
-.DS_Store
-.DS_Store?
-.*_
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Docker
-docker-compose.override.yml
-
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json # (yarn.lockを使う場合)
+# package-lock.json # (yarn.lockを使う場合)
 # yarn.lock # (package-lock.jsonを使う場合)
 
 # Build artifacts
 dist/
 build/
 
-# IDE specific
+# OS / Editor specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 .vscode/
 .idea/
+.cursor/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Docker specific
+docker-compose.override.yml
+# BERT model downloaded during Docker build, ignore local copy
+tts/bert/
+
+# Logs
+*.log
+
+# Other specific ignores
+test.wav
+ERROR # Check if this specific name is still needed
+
+# Git LFS is configured in .gitattributes for *.safetensors
