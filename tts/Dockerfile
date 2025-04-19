@@ -48,6 +48,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     libsndfile1 \
     espeak-ng \
+    cmake \
+    mecab-ipadic-utf8 \
  && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory

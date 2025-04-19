@@ -57,7 +57,7 @@ async def synthesize_speech(payload: TextPayload):
             # "format": "wav" # 必要ならフォーマット指定
         }
         # Timeout を設定
-        timeout_seconds = 60 # 60秒でタイムアウト（適宜調整）
+        timeout_seconds = 180 # タイムアウトを180秒（3分）に延長
 
         logger.info(f"Sending request to TTS service at {TTS_API_URL}/voice")
         response = requests.post(f"{TTS_API_URL}/voice", json=tts_payload, stream=True, timeout=timeout_seconds)

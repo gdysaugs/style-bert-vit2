@@ -59,7 +59,7 @@ ln = config.server_config.language
 pyopenjtalk.initialize_worker()
 
 # dict_data/ 以下の辞書データを pyopenjtalk に適用
-update_dict()
+# update_dict() # 起動時の辞書更新を一時的にコメントアウト (タイムアウトエラー回避)
 
 # 事前に BERT モデル/トークナイザーをロードしておく
 ## ここでロードしなくても必要になった際に自動ロードされるが、時間がかかるため事前にロードしておいた方が体験が良い

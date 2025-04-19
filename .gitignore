@@ -45,3 +45,41 @@ ERROR # このファイルも無視リストに追加
 
 # Git LFS files (These will be pointers, not the actual large files)
 # *.safetensors
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS generated files
+.DS_Store
+.DS_Store?
+.*_
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json # (yarn.lockを使う場合)
+# yarn.lock # (package-lock.jsonを使う場合)
+
+# Build artifacts
+dist/
+build/
+
+# IDE specific
+.vscode/
+.idea/
