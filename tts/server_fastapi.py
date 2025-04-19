@@ -111,17 +111,17 @@ class VoicePayload(BaseModel):
     model_id: int = Field(0, description="モデルID。`GET /models/info`のkeyの値を指定ください")
     speaker_name: Optional[str] = Field(None, description="話者名(speaker_idより優先)。esd.listの2列目の文字列を指定")
     speaker_id: int = Field(0, description="話者ID。model_assets>[model]>config.json内のspk2idを確認")
-    sdp_ratio: float = Field(DEFAULT_SDP_RATIO, description="SDP(Stochastic Duration Predictor)/DP混合比。比率が高くなるほどトーンのばらつきが大きくなる")
-    noise: float = Field(DEFAULT_NOISE, description="サンプルノイズの割合。大きくするほどランダム性が高まる")
-    noisew: float = Field(DEFAULT_NOISEW, description="SDPノイズ。大きくするほど発音の間隔にばらつきが出やすくなる")
-    length: float = Field(DEFAULT_LENGTH, description="話速。基準は1で大きくするほど音声は長くなり読み上げが遅まる")
+    sdp_ratio: float = Field(DEFAULT_SDP_RATIO, ge=0.0, description="SDP(Stochastic Duration Predictor)/DP混合比。比率が高くなるほどトーンのばらつきが大きくなる")
+    noise: float = Field(DEFAULT_NOISE, ge=0.0, description="サンプルノイズの割合。大きくするほどランダム性が高まる")
+    noisew: float = Field(DEFAULT_NOISEW, ge=0.0, description="SDPノイズ。大きくするほど発音の間隔にばらつきが出やすくなる")
+    length: float = Field(DEFAULT_LENGTH, ge=0.1, description="話速。基準は1で大きくするほど音声は長くなり読み上げが遅まる")
     language: Languages = Field(ln, description="textの言語")
     auto_split: bool = Field(DEFAULT_LINE_SPLIT, description="改行で分けて生成")
-    split_interval: float = Field(DEFAULT_SPLIT_INTERVAL, description="分けた場合に挟む無音の長さ（秒）")
+    split_interval: float = Field(DEFAULT_SPLIT_INTERVAL, ge=0.0, description="分けた場合に挟む無音の長さ（秒）")
     assist_text: Optional[str] = Field(None, description="このテキストの読み上げと似た声音・感情になりやすくなる。ただし抑揚やテンポ等が犠牲になる傾向がある")
-    assist_text_weight: float = Field(DEFAULT_ASSIST_TEXT_WEIGHT, description="assist_textの強さ")
+    assist_text_weight: float = Field(DEFAULT_ASSIST_TEXT_WEIGHT, ge=0.0, le=1.0, description="assist_textの強さ")
     style: Optional[str] = Field(DEFAULT_STYLE, description="スタイル")
-    style_weight: float = Field(DEFAULT_STYLE_WEIGHT, description="スタイルの強さ")
+    style_weight: float = Field(DEFAULT_STYLE_WEIGHT, ge=0.0, description="スタイルの強さ")
     reference_audio_path: Optional[str] = Field(None, description="スタイルを音声ファイルで行う ※サーバーローカルパス指定のため通常API経由では非推奨")
 
 
@@ -289,8 +289,6 @@ if __name__ == "__main__":
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Inference error: {e}"
             )
 
-        logger.info(f"{request.client.host}:{request.client.port} /voice requested for text: '{payload.text[:50]}...'" if len(payload.text) > 50 else f"{request.client.host}:{request.client.port} /voice requested for text: '{payload.text}'")
-
         with BytesIO() as bio:
             wavfile.write(bio, sampling_rate, audio)
             return AudioResponse(bio.getvalue())
@@ -358,26 +356,11 @@ if __name__ == "__main__":
             "gpu": gpuInfo,
         }
 
-    @app.get("/tools/get_audio", response_class=AudioResponse)
-    def get_audio(
-        request: Request, path: str = Query(..., description="local wav path")
-    ):
-        """wavデータを取得する"""
-        logger.info(
-            f"{request.client.host}:{request.client.port}/tools/get_audio  { unquote(str(request.query_params) )}"
-        )
-        if not os.path.isfile(path):
-            raise_validation_error(f"path={path} not found", "path")
-        if not path.lower().endswith(".wav"):
-            raise_validation_error(f"wav file not found in {path}", "path")
-        return FileResponse(path=path, media_type="audio/wav")
-
     # 変更: 実際にUvicornがリッスンするホストとポートをログに出す
     listen_host = "0.0.0.0"
     listen_port = config.server_config.port
     logger.info(f"Server starting, configured to listen on: http://{listen_host}:{listen_port}")
-    # 削除: 未定義変数 TTS_HOST_PORT を使っていて NameError になるためコメントアウト
-    # logger.info(f"API docs available at: http://<your-host-ip>:{listen_port}/docs (or http://localhost:{TTS_HOST_PORT}/docs if mapped)") # 修正: localhost固定ではなく説明的に
+    logger.info(f"API documentation available at http://{listen_host}:{listen_port}/docs")
     logger.info(
         f"Input text length limit: {limit}. You can change it in server.limit in config.yml"
     )

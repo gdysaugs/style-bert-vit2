@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-// バックエンドAPIのエンドポイント (本来は環境変数から取得すべき)
-const BACKEND_API_URL = 'http://localhost:8000'; // docker-compose.yml の backend ポートに合わせる
+// バックエンドAPIのエンドポイント
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:8000'; // 環境変数から取得、なければデフォルト値
 
 function App() {
   const [text, setText] = useState<string>('');
@@ -14,7 +14,6 @@ function App() {
   useEffect(() => {
     if (prevAudioUrl) {
       URL.revokeObjectURL(prevAudioUrl);
-      // console.log("Revoked old audio URL:", prevAudioUrl);
     }
     // 現在の audioUrl を次回の解放のために保持
     setPrevAudioUrl(audioUrl);
@@ -23,7 +22,6 @@ function App() {
     return () => {
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
-        // console.log("Revoked audio URL on unmount:", audioUrl);
       }
     };
     // audioUrl が変更されたときだけ実行
@@ -70,7 +68,6 @@ function App() {
 
       // 新しい Blob URL を作成して state にセット
       const newUrl = URL.createObjectURL(audioBlob);
-      // console.log("Created new audio URL:", newUrl);
       setAudioUrl(newUrl);
 
     } catch (err: any) {

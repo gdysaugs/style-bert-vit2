@@ -19,9 +19,8 @@ TTS_API_URL = os.getenv("TTS_API_URL")
 
 if not TTS_API_URL:
     logger.error("Environment variable TTS_API_URL is not set.")
-    # ここでアプリケーションを終了させるか、デフォルト値を設定するか、エラーを発生させる
-    # 今回は起動時にエラーログを出すだけにしておく
-    # raise ValueError("TTS_API_URL must be set in the environment variables")
+    # アプリケーションを終了させる
+    raise ValueError("TTS_API_URL must be set in the environment variables")
 
 
 class TextPayload(BaseModel):
