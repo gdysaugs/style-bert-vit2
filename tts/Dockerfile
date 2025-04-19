@@ -69,7 +69,10 @@ RUN pip install --upgrade pip
 # Install Python dependencies using the absolute path
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy the rest of the application code (excluding what's in .dockerignore)
+# Remove .dockerignore within the build context just in case it exists and causes issues
+RUN rm -f /app/.dockerignore
+
+# Copy the rest of the application code
 COPY . .
 
 # Set default environment variables
